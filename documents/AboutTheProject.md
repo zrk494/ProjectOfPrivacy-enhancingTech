@@ -22,7 +22,9 @@ A Web-based **Static Analytical Showcase**. The project team will run data pipel
 - **Display Goal**: Build a front-end interface that clearly correlates "odds anomalies" with "statistical evidence" (such as Z-Score mutations, volume spikes).
 - **Engineering Goals**:
   - Implement data cleaning and resampling mechanisms.
-  - Implement two specific anomaly detection algorithms: **Front-running/Insider Trading Patterns** and **Parity Formula Breakdown/Arbitrage Patterns**.
+  - Implement two specific anomaly detection algorithms, **showcasing their causal relationship**:
+    - **The Cause (Micro-level): Sniper Attack Detection**. Tracing the root cause by identifying specific malicious wallet behaviors.
+    - **The Symptom (Macro-level): Market-Level Statistical Anomaly Detection**. Detecting the resulting observable market disruptions triggered by the sniper's actions.
 
 ### 2.2 Non-Goals
 
@@ -31,7 +33,14 @@ A Web-based **Static Analytical Showcase**. The project team will run data pipel
 - **No Tick-by-tick Analysis**: Do not process Tick-level transaction data, do not track specific accounts (Whale Tracking), focus only on aggregated prices and volumes.
 - **No Complex Attribution**: Do not attempt to explain "why" anomalies occurred (such as scraping external news), only show "what happened".
 
-## 3. Core Project Pipeline (Project Pipeline & User Flows)
+## 3. Core Display Strategy
+
+Given the static nature of the showcase and browser performance constraints, we will adopt a **"Detective Report" Card-based UI (Drill-down interaction)** in Streamlit to intuitively demonstrate the causal link between the two anomaly dimensions:
+
+- **Level 1: Macro Evidence**: The card initially displays the macro-level symptoms (e.g., a minute-level trading volume surge or extreme Price Z-Score).
+- **Level 2: Micro Tracing**: Users can expand the card to reveal the microscopic root cause, showing the specific suspect wallet address, its Isolation Forest anomaly score, and the exact sequence of the sniper attack (e.g., rapid buy/sell pairs with large amounts).
+
+## 4. Core Project Pipeline (Project Pipeline & User Flows)
 
 The data flow of this project is strictly divided into three phases:
 
@@ -49,18 +58,19 @@ The data flow of this project is strictly divided into three phases:
 
 *Objective: Run offline algorithms, output anomalous event lists. We will focus on detecting two patterns:*
 
-1. **Pattern A: Pre-news "Front-running" Volatility (Front-running / Insider Pattern)**
-   - **Definition**: Sudden dramatic fluctuations that occur during market calm periods, often indicating insider information leaks.
+1. **Pattern A: Market-Level Statistical Anomaly Detection**
+   - **Definition**: Detect unusual market behavior through statistical analysis of aggregated price and volume data.
    - **Detection Logic**:
      - Calculate moving averages (MA) and standard deviations (StdDev) of prices.
      - Identify time windows with **Volume Spikes** (volume surges) accompanied by **High Z-Score** (price deviation from mean > 3σ).
-   - **Output**: Marked as "Type A: Volatility Anomaly".
-2. **Pattern B: Parity Formula Breakdown & Arbitrage (Parity Breakage / Arbitrage)**
-   - **Definition**: In binary prediction markets, theoretically `Price(Yes) + Price(No)` should equal 1. When the sum significantly deviates from 1, it indicates market failure or risk-free arbitrage opportunities.
+   - **Output**: Marked as "Type A: Market Anomaly".
+2. **Pattern B: Sniper Attack Detection**
+   - **Definition**: Detect manipulative behavior where attackers use large funds to pump prices, then sell quickly after retail traders follow.
    - **Detection Logic**:
-     - Calculate `Spread = |Price(Yes) + Price(No) - 1|`.
-     - When `Spread > Threshold` (e.g., 0.02) and persists for more than N minutes, it is considered anomalous.
-   - **Output**: Marked as "Type B: Arbitrage Opportunity".
+     - Use session-based analysis (transactions from same address within 30 minutes).
+     - Apply Isolation Forest with AI features (Sentence-BERT for transaction sequences).
+     - Identify top 5% most anomalous sessions with specific sniper characteristics.
+   - **Output**: Marked as "Type B: Sniper Attack".
 
 ### Phase Three: Result Showcase
 
@@ -68,31 +78,32 @@ The data flow of this project is strictly divided into three phases:
 
 1. **Global Overview**:
    - Users open the webpage and see the full timeline of odds trends.
-   - The timeline marks **Type A (Volatility)** and **Type B (Arbitrage)** anomalies with different colors.
+   - The timeline marks **Type A (Market Anomaly)** and **Type B (Sniper Attack)** anomalies with different colors.
 2. **Interactive Drill-down**:
-   - User clicks a **Type A** marker -> Pop-up shows the volume histogram and volatility curve at that moment (proving front-running).
-   - User clicks a **Type B** marker -> Pop-up shows the superimposed curves of `Price(Yes) + Price(No)` (proving the two lines separate, sum not equal to 1).
+   - User clicks a **Type A** marker -> Pop-up shows the volume histogram and volatility curve at that moment (proving statistical anomaly).
+   - User clicks a **Type B** marker -> Pop-up shows the transaction sequence and session analysis (proving sniper attack pattern).
 
-## 4. Key Decisions & Risk Management
+## 5. Key Decisions & Risk Management
 
-### 4.1 Identified Risks & Mitigation Strategies
+### 5.1 Identified Risks & Mitigation Strategies
 
 | Risk Point                          | Description                                                  | Mitigation Strategy                                          |
 | ----------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
-| **Data Alignment Error**            | If Yes and No trades don't occur at exactly the same millisecond, simple addition could lead to false "arbitrage signals". | **Resampling Buffer**. During preprocessing, downsample data (e.g., 1-minute or 5-minute windows), taking weighted average prices within that window to eliminate noise from micro-time differences. |
+| **Data Unavailability**            | Sniper attack detection requires wallet address information which may not be available in current data sources. | **Data Source Expansion**. Acquire raw trade data with wallet addresses from Polymarket API or blockchain explorers to enable session-based analysis. |
 | **Browser Performance Bottleneck**  | Loading 6 months of high-frequency data directly would crash the browser. | **On-demand Loading**. Frontend defaults to loading only "hourly" overview data; only load "minute-level" details for that segment when users click specific events. |
 | **Algorithm "Hindsight Bias"**       | Pre-calculated results may appear to be manually selected.    | **Explicitly display algorithm thresholds** on the interface (e.g., "Detection threshold: Spread > 0.05"), showing that this is rule-based objective filtering. |
 
-### 4.2 Tentative Tech Stack
+### 5.2 Tentative Tech Stack
 
-- **Data Processing**: Python (Pandas, NumPy)
+- **Data Processing**: Python (Pandas, NumPy, Scikit-learn)
 - **Data Source**: Polymarket Clob API / Historical Data Snapshots
 - **Frontend Display**: Streamlit
 - **Data Format**: Static JSON files
 
-## 5. Next Steps
+## 6. Next Steps
 
 1. **Spec Writing**: Based on this findings document, begin writing the detailed `SRS (Software Requirements Specification)`.
 2. **Algorithm Validation**:
    - Write Python script to calculate `Price(Yes) + Price(No)` for a market.
-   - Observe whether there are significant instances of `Sum != 1` in historical data to determine if "arbitrage detection" has practical demonstration value.
+   - Acquire wallet address data to enable session-based sniper attack detection.
+   - Validate both statistical anomaly detection and sniper attack detection on historical data **to confirm their causal correlation**.
