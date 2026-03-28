@@ -4,7 +4,7 @@ Unified interface for sniper detection
 import pandas as pd
 import os
 from .plot_attack_windows import plot_attack_window as plot_window
-from .train_model import load_data, train_detector
+from .train_model import load_data, train_isolation_forest
 
 
 class SniperDetector:
