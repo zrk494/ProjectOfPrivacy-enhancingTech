@@ -70,7 +70,10 @@ def display_layer1_market_overview(lang):
         st.subheader(LANGUAGES[lang]['top_stress_events'])
         if not all_events_df.empty:
             top_events = all_events_df.sort_values('peak_stress_score', ascending=False).head(10)
-            display_cols = ['market_file', 'start_datetime', 'duration_minutes', 'total_amount', 'peak_stress_score']
+            # 从 market_file 提取 market_id（去掉 _YES 后缀）
+            if 'market_file' in top_events.columns:
+                top_events['market_id'] = top_events['market_file'].str.split('_').str[0]
+            display_cols = ['market_id', 'start_datetime', 'duration_minutes', 'total_amount', 'peak_stress_score']
             existing_cols = [c for c in display_cols if c in top_events.columns]
             st.dataframe(top_events[existing_cols], use_container_width=True)
         else:
