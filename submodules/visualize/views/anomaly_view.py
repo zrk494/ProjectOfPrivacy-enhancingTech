@@ -460,7 +460,7 @@ def display_sniper_detection_cards(lang):
                             image_path = image_path[7:]
                         full_image_path = SNIPER_IMAGES_DIR / image_path
                         if full_image_path.exists():
-                            st.image(str(full_image_path), use_container_width=True)
+                            st.image(str(full_image_path), use_column_width=True)
                         else:
                             st.warning(f"{LANGUAGES[lang]['image_not_found']} {image_path}")
                 
