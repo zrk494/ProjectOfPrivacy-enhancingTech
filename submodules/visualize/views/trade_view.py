@@ -59,7 +59,7 @@ def display_trade_view(market_id, lang):
         height=VOLUME_CHART_HEIGHT
     )
     
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
     
     # 显示交易表格（带分页）
     st.subheader(LANGUAGES[lang]['trade_records'])
@@ -91,7 +91,7 @@ def display_trade_view(market_id, lang):
     
     st.dataframe(
         all_trades[['datetime', 'side', 'price', 'size', 'amount']].iloc[start_idx:end_idx],
-        width='stretch',
+        use_container_width=True,
         column_config={
             "datetime": LANGUAGES[lang]['time'],
             "side": LANGUAGES[lang]['side'],

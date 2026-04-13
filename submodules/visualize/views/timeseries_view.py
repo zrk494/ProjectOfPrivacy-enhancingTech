@@ -93,13 +93,13 @@ def display_timeseries_view(market_id, lang):
         hovermode='x unified'
     )
     
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
     
     # 显示数据表格
     st.subheader(LANGUAGES[lang]['data_details'])
     st.dataframe(
         yes_df[['datetime', 'midpoint', 'best_bid', 'best_ask', 'spread', 'bid_depth_top5', 'ask_depth_top5']].tail(100),
-        width='stretch',
+        use_container_width=True,
         column_config={
             "datetime": LANGUAGES[lang]['time'],
             "midpoint": LANGUAGES[lang]['midpoint'],

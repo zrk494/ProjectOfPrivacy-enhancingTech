@@ -17,7 +17,7 @@ def display_metadata_view(metadata_df, lang):
     # 显示元数据表格
     st.dataframe(
         metadata_df[['market_id', 'question', 'end_date', 'volume_24hr', 'liquidity']],
-        width='stretch',
+        use_container_width=True,
         column_config={
             "market_id": LANGUAGES[lang]['market_id'],
             "question": LANGUAGES[lang]['question'],
