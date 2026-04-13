@@ -30,14 +30,7 @@ def main():
     
     # 创建侧边栏
     lang, selected_market_id, view_type = create_sidebar(lang, metadata_df)
-    
-    # 更新页面标题
-    st.set_page_config(
-        page_title=LANGUAGES[lang]['page_title'],
-        layout=PAGE_LAYOUT,
-        page_icon=PAGE_ICON
-    )
-    
+
     # 创建页面头部
     create_header(lang)
     
